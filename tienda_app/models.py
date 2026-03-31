@@ -9,6 +9,13 @@ class Libro(models.Model):
     def __str__(self):
         return self.titulo
 
+    @property
+    def stock_actual(self):
+        try:
+            return self.inventario.cantidad
+        except Inventario.DoesNotExist:
+            return 0
+
 
 class Inventario(models.Model):
     libro = models.OneToOneField(Libro, on_delete=models.CASCADE)

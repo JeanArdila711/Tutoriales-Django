@@ -1,8 +1,7 @@
 import os
-
 from .gateways import BancoNacionalProcesador
 
-
+# Implementación ligera para pruebas
 class MockPaymentProcessor:
     def pagar(self, monto: float) -> bool:
         print(f"[DEBUG] Mock Payment: Procesando pago de ${monto} sin cargo real.")

@@ -45,3 +45,37 @@ class CompraService:
         inv.save()
 
         return orden.total
+
+    def ejecutar_proceso_compra(self, usuario, lista_productos, direccion):
+        orden = (
+            self.builder
+            .con_usuario(usuario)
+            .con_productos(lista_productos)
+            .para_envio(direccion)
+            .build()
+        )
+
+        if self.procesador_pago.pagar(orden.total):
+            return f"Orden {orden.id} procesada exitosamente."
+        orden.delete()
+        raise Exception("Error en la pasarela de pagos")
+
+
+class CompraRapidaService:
+    def __init__(self, procesador_pago):
+        self.procesador_pago = procesador_pago
+
+    def procesar(self, libro_id):
+        libro = Libro.objects.get(id=libro_id)
+        inv = Inventario.objects.get(libro=libro)
+
+        if inv.cantidad <= 0:
+            raise ValueError("No hay existencias.")
+
+        total = CalculadorImpuestos.obtener_total_con_iva(libro.precio)
+
+        if self.procesador_pago.pagar(total):
+            inv.cantidad -= 1
+            inv.save()
+            return total
+        return None
